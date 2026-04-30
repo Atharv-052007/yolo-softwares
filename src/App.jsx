@@ -193,6 +193,32 @@ function App() {
           </div>
           
           <h1 className="font-black tracking-tight leading-[1.1] text-[clamp(48px,8vw,80px)] text-[#111827]">
+            <style>{`
+              @keyframes fade-up {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              @keyframes bob {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+              }
+              @keyframes spin-slow {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+              }
+              @keyframes scanline {
+                0% { transform: translateY(-100%); }
+                100% { transform: translateY(100%); }
+              }
+              @keyframes glimmer {
+                0%, 100% { opacity: 0.3; transform: scale(1); }
+                50% { opacity: 0.8; transform: scale(1.2); }
+              }
+              .animate-fade-up { animation: fade-up 0.8s ease-out forwards; }
+              .animate-bob { animation: bob 3s ease-in-out infinite; }
+              .animate-spin-slow { animation: spin-slow 12s linear infinite; }
+              .animate-glimmer { animation: glimmer 4s ease-in-out infinite; }
+            `}</style>
             <span className="block animate-fade-up" style={{ animationDelay: '0.1s' }}>You only</span>
             <span className="block mt-2 animate-fade-up" style={{ animationDelay: '0.2s' }}>
               <span className="text-[#2563EB] relative">
@@ -613,17 +639,90 @@ function ProjectCard({ title, category, className = "" }) {
   )
 }
 
-function TeamCard({ name, role, desc }) {
+function TeamCard({ name, role, isHovered, isSomeHovered }) {
+  const scale = isHovered ? 'scale-150 translate-y-[-40px]' : isSomeHovered ? 'scale-90 blur-[2px] opacity-40 translate-y-[10px]' : 'scale-100'
+  const zIndex = isHovered ? 'z-30' : 'z-10'
+
+  // ROLE-BASED ICONS (CoC Style Artifacts)
+  const renderIcon = () => {
+    const iconClass = `transition-all duration-500 ${isHovered ? 'text-[#2563EB] drop-shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'text-gray-200'}`
+    
+    if (role.includes("CEO")) {
+      return <svg className={iconClass} width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/></svg>
+    } else if (name.includes("Atharv")) {
+      return <svg className={iconClass} width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 10-4 4-4-4"/><path d="m7 21 3-3 3 3 3-3 3 3"/></svg>
+    } else if (name.includes("Aayush")) {
+      return <svg className={iconClass} width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v19"/><path d="M5 8h14"/><path d="M15 21a3 3 0 0 0-3-3 3 3 0 0 0-3 3"/></svg>
+    } else {
+      return <svg className={iconClass} width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M20 12h2"/><path d="M2 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 19.07-1.41-1.41"/><path d="m6.34 6.34-1.41-1.41"/></svg>
+    }
+  }
+
   return (
-    <div className="text-center">
-      <div className="w-32 h-32 mx-auto rounded-full bg-gray-200 mb-5 overflow-hidden relative group">
-        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 group-hover:scale-110 transition-transform duration-500 flex items-center justify-center text-4xl font-bold text-gray-400">
-          {name.charAt(0)}
+    <div className={`flex flex-col items-center transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) cursor-pointer ${scale} ${zIndex}`}>
+      {/* HERO REPRESENTATION (No Profile Pic, No Letters) */}
+      <div className="relative h-32 md:h-44 flex items-center justify-center">
+        {/* CONCENTRATED SPOTLIGHT ON ACTIVE HERO */}
+        {isHovered && (
+          <div className="absolute inset-0 bg-[#2563EB]/10 blur-[60px] rounded-full -z-10 animate-pulse"></div>
+        )}
+        
+        {/* HERO ARTIFACT / ICON with Bobbing Animation and Holographic Scanline */}
+        <div className={`relative transition-all duration-500 ${isHovered ? '' : 'animate-bob'}`}>
+          {renderIcon()}
+          
+          {/* HOLOGRAPHIC SCANLINE EFFECT */}
+          {isHovered && (
+            <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
+              <div className="w-full h-1/2 bg-gradient-to-b from-transparent via-[#2563EB]/20 to-transparent absolute top-0 left-0 w-full animate-[scanline_2s_linear_infinite]"></div>
+            </div>
+          )}
+        </div>
+
+        {/* INDIVIDUAL FLOOR SHADOW */}
+        <div className={`absolute -bottom-10 left-1/2 -translate-x-1/2 w-32 h-8 bg-[#2563EB]/10 blur-xl rounded-[100%] transition-all duration-500 ${isHovered ? 'opacity-100 scale-150' : 'opacity-40 scale-100'}`}></div>
+        
+        {/* ARENA RING (Visible on hover) */}
+        {isHovered && (
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-48 h-12 border-2 border-[#2563EB]/20 rounded-[100%] animate-spin-slow">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#2563EB] rounded-full shadow-[0_0_10px_#2563EB]"></div>
+          </div>
+        )}
+      </div>
+
+      {/* NAME LABEL */}
+      <div className="mt-16 text-center pointer-events-none">
+        <h3 className={`text-sm md:text-xl font-black tracking-[0.2em] uppercase italic transition-all duration-500 ${isHovered ? 'text-[#111827] scale-110 drop-shadow-[0_0_10px_rgba(37,99,235,0.1)]' : 'text-gray-300'}`}>
+          {name}
+        </h3>
+        <div className={`h-0.5 bg-[#2563EB] mx-auto mt-2 transition-all duration-500 ${isHovered ? 'w-full opacity-100' : 'w-0 opacity-0'}`}></div>
+        
+        {/* STATS / POWER BARS (Catchy detail) */}
+        <div className={`flex flex-col gap-1.5 mt-4 transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest w-12">Expertise</span>
+            <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-[#2563EB] w-[95%]"></div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest w-12">Vision</span>
+            <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-[#2563EB] w-[90%]"></div>
+            </div>
+          </div>
+          <p className="text-[10px] text-[#2563EB] font-bold tracking-[0.3em] uppercase mt-2">
+            {role}
+          </p>
+
+          {/* FOUNDER SIGNATURE / MISSION (More detail) */}
+          <div className="mt-4 border-t border-[#2563EB]/10 pt-4 overflow-hidden">
+             <p className="text-[9px] text-gray-400 italic tracking-wider leading-relaxed">
+               "Driving innovation through clean code and scalable design."
+             </p>
+          </div>
         </div>
       </div>
-      <h3 className="text-lg font-bold text-[#111827]">{name}</h3>
-      <p className="text-[#2563EB] text-sm font-medium mb-3">{role}</p>
-      <p className="text-[#6B7280] text-sm leading-relaxed">{desc}</p>
     </div>
   )
 }
@@ -644,21 +743,78 @@ function FAQItem({ question, answer }) {
 }
 
 function AboutPage() {
+  const [hoveredIndex, setHoveredIndex] = useState(null)
+  const team = [
+    { name: "Prathamesh Bhujbal", role: "Founder & CEO" },
+    { name: "Atharv Chougule", role: "Co-Founder" },
+    { name: "Aayush Kandhare", role: "Co-Founder" },
+    { name: "Govind Gandhi", role: "Co-Founder" }
+  ]
+
   return (
-    <div className="pt-32 pb-24 px-6 min-h-[80vh] flex flex-col items-center animate-fade-up">
-      <div className="max-w-7xl mx-auto w-full">
-        <div className="text-center mb-16 md:mb-24">
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#111827]">About Yolo Softwares</h1>
-          <p className="mt-6 text-[#6B7280] text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            We are a team of passionate engineers, designers, and strategists dedicated to building software that solves real problems. No bloat, no cutting corners—just high-performance digital products that scale.
-          </p>
+    <div className="pt-32 pb-40 px-6 min-h-screen bg-white overflow-hidden relative flex flex-col items-center justify-center">
+      
+      {/* ARENA BACKGROUND ELEMENTS */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* DISTANT MONUMENTS / STATUES */}
+        <div className="absolute top-[15%] left-[10%] w-32 h-64 bg-gradient-to-b from-[#2563EB]/5 to-transparent skew-x-[-15deg] blur-md opacity-20"></div>
+        <div className="absolute top-[10%] right-[15%] w-40 h-80 bg-gradient-to-b from-[#2563EB]/5 to-transparent skew-x-[12deg] blur-lg opacity-10"></div>
+        
+        {/* FLOATING GLIMMERS */}
+        <div className="absolute top-[20%] left-[30%] w-1 h-1 bg-[#2563EB] rounded-full animate-glimmer"></div>
+        <div className="absolute top-[40%] right-[25%] w-1.5 h-1.5 bg-[#2563EB] rounded-full animate-glimmer" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[30%] left-[20%] w-1 h-1 bg-[#2563EB] rounded-full animate-glimmer" style={{ animationDelay: '2s' }}></div>
+        
+        {/* LARGE AMBIENT LIGHTS */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[#2563EB]/5 blur-[150px] rounded-full"></div>
+        <div className="absolute -bottom-[10%] left-1/2 -translate-x-1/2 w-[150%] h-[300px] bg-[#2563EB]/10 blur-[100px] rounded-full"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto w-full relative z-10">
+        <div className="text-center mb-32">
+          <h1 className="text-4xl md:text-6xl font-black tracking-[0.2em] text-[#111827] uppercase italic drop-shadow-[0_0_15px_rgba(37,99,235,0.1)]">Our Founders</h1>
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#2563EB]"></div>
+            <div className="w-2 h-2 rotate-45 bg-[#2563EB]"></div>
+            <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#2563EB]"></div>
+          </div>
         </div>
         
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <TeamCard name="Prathamesh Bhujbal" role="Founder & CEO" desc="Visionary leader driving innovation, growth, and the company's long-term strategy." />
-          <TeamCard name="Atharv Chougule" role="Co-Founder" desc="Technical mastermind ensuring scalable and robust architecture across all products." />
-          <TeamCard name="Aayush Kandhare" role="Co-Founder" desc="Product strategist focused on user experience, design, and achieving market fit." />
-          <TeamCard name="Govind Gandhi" role="Co-Founder" desc="Operations expert ensuring smooth delivery, execution, and team coordination." />
+        <div className="relative pt-24 pb-12">
+          {/* THE PEDESTAL / ARENA FLOOR (Multilayered for depth) */}
+          <div className="absolute bottom-[-100px] left-1/2 -translate-x-1/2 w-[140%] h-[250px] bg-gray-50 border-t-[6px] border-[#2563EB]/5 rounded-[100%] shadow-[inset_0_40px_80px_rgba(37,99,235,0.03)] z-0">
+            {/* FLOOR PATTERNS */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-full border-t-2 border-[#2563EB]/5 rounded-[100%] opacity-20"></div>
+            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[60%] h-[80%] border-t border-[#2563EB]/10 rounded-[100%] opacity-40"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.02)_0%,transparent_70%)]"></div>
+          </div>
+
+          {/* HERO LINEUP */}
+          <div className="flex flex-wrap justify-center items-end gap-2 md:gap-4 lg:gap-10 relative z-20">
+            {team.map((member, idx) => (
+              <div 
+                key={idx} 
+                onMouseEnter={() => setHoveredIndex(idx)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                className="w-32 md:w-44 lg:w-52 transition-all duration-500"
+              >
+                <TeamCard 
+                  {...member} 
+                  isHovered={hoveredIndex === idx} 
+                  isSomeHovered={hoveredIndex !== null}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER-LIKE INFO */}
+      <div className="mt-40 text-center relative z-10">
+        <div className="inline-flex items-center gap-6 px-8 py-3 bg-gray-50 border border-gray-100 rounded-full">
+          <div className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></div>
+          <p className="text-[#6B7280] font-black uppercase tracking-[0.5em] text-[10px]">Elite Development Squad</p>
+          <div className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></div>
         </div>
       </div>
     </div>
